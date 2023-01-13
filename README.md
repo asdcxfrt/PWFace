@@ -31,10 +31,6 @@ This script uses the Pygame library to animate the mouth of an image depending o
 
 You can change the loudness threshold and the images path to your preference.
 
-## Note
-
-The script uses the win32api and win32con library to set the window to always be on top of other windows. This feature could be annoying for the user, so it's recommended to use it sparingly and only when it's necessary for the functionality of your program.
-
 ## Conclusion
 
 This script demonstrates how to use Pygame to create a simple animation in response to sound input. It can be used as a starting point for more complex animations or interactive projects.
