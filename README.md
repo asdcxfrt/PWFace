@@ -3,7 +3,15 @@
 
 This script uses the Pygame library to animate the mouth of an image depending on the loudness of sound from the microphone.
 
-!(https://www.youtube.com/watch?v=dA99VW8Em7U)
+<iframe
+    width="640"
+    height="480"
+    src="https://www.youtube.com/watch?v=dA99VW8Em7U"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+>
+</iframe>
 ## Prerequisites
 
 -   Pygame
