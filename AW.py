@@ -43,7 +43,7 @@ close = 0
 countframes=0
 old=0
 p = pyaudio.PyAudio()
-#stream = p.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
+stream = p.open(format=pyaudio.paInt16, channels=1, rate=44100, input=True, frames_per_buffer=1024)
 
 device_index = None
 for i in range(p.get_device_count()):
@@ -61,12 +61,7 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
 # создание входного потока аудио
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                input_device_index=device_index,
-                frames_per_buffer=CHUNK_SIZE)
+#stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, input_device_index=device_index, frames_per_buffer=CHUNK_SIZE)
 maxV=2000
 t=time.time()
 window_screen.fill((255,0,128))
