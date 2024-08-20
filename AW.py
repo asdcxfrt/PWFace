@@ -49,7 +49,7 @@ device_index = None
 for i in range(p.get_device_count()):
     device_info = p.get_device_info_by_index(i)
     #print(device_info)
-    if "VoiceMeeter" in device_info["name"]:
+    if "VoiceMeeter" in device_info["name"]: # Change VoiceMeeter to your microphone name
         device_index = i
         break
 

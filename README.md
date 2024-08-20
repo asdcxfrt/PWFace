@@ -13,10 +13,11 @@ This script uses the Pygame library to animate the mouth of an image depending o
 
 ## Usage
 
-1.  Run the script
-2.  Speak into the microphone
-3.  Observe the animation of the mouth on the window
-4.  Press Escape to exit the animation
+1.  Rename microphone to your own in AW.py:52
+2.  Run the script
+3.  Speak into the microphone
+4.  Observe the animation of the mouth on the window
+5.  Press Escape to exit the animation
 
 ## Code explanation
 
