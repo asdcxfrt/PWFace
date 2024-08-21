@@ -129,7 +129,7 @@ while not close:
     for event in py.event.get():
         if event.type == py.QUIT:
             close = True
-            Exit(stream, p)
+            Exit(p, stream)
         elif event.type == py.MOUSEBUTTONDOWN:
             
             while py.mouse.get_pressed()[0]==True:
