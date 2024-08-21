@@ -8,24 +8,43 @@ import time
 import numpy as np
 import os
 import sys
+import ctypes
 import json
 
 
 # Размер окна
 Window_Size = 300
 # Повернуть персонажа в другую сторону 
-Reflect = True 
+Reflect = False 
 # Максимальная громкость входного аудиопотока. Если будет больше, то программа установит значение громкости равное maxV.
 # Запустите программу и протестируйте комфортную для вас громкость речи. Если вы не стесняетесь орать на всю квартиру(или у вас громкий микрофон)
 # И в терминале громкость заметно больше 2000, то можете увеличить значение maxV. 
 maxV=2000
 BackgroundNoise=100  # Уровень шума окружения. 
-# Вывод в консоль 
+# Вывод в консоль. Если хотите убрать консоль, то установите в False
 DebugMode = True
 
 # Папка со спрайтами персонажа. Имена файлов должны легко сортироваться, чтобы при их упорядочивании они совпадали с вашими ожиданиями.
 # Чем больше цифра в имени файла, тем больше степень открытости рта, и т.д.
 sprite_folder = "Sprites"
+
+def hide_console():
+    # Получаем дескриптор текущего консольного окна
+    hwnd = ctypes.windll.kernel32.GetConsoleWindow()
+    if hwnd:
+        # Скрываем окно консоли
+        ctypes.windll.user32.ShowWindow(hwnd, 0)  # 0 = SW_HIDE
+
+def show_console():
+    # Получаем дескриптор текущего консольного окна
+    hwnd = ctypes.windll.kernel32.GetConsoleWindow()
+    if hwnd:
+        # Показываем окно консоли
+        ctypes.windll.user32.ShowWindow(hwnd, 5)  # 5 = SW_SHOW
+
+
+if DebugMode == False:
+    hide_console()
 
 def LogLine(PrintLoudness=True, PrintSettings=False, PrintDeviceInfo=True):
     global Window_Size, Reflect
@@ -104,10 +123,53 @@ RATE = 48000
 # После настройки VoiceMeeter просто запустите воспроизведение любого медиафайла.
 device_info={}
 
+window_screen.fill((255,0,128))
+window_screen.blit(mouth[0], (0, 0))
+py.display.update()
+
 # Понял, что должно работать с ЛЮБЫМ микрофоном по умолчанию. 
 try:
+    
+
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK_SIZE)
+    t=time.time()
+    
+    while not close:
+        for event in py.event.get():
+            if event.type == py.QUIT:
+                close = True
+                Exit(p, stream)
+            elif event.type == py.MOUSEBUTTONDOWN:
+                
+                while py.mouse.get_pressed()[0]==True:
+                    #print(py.mouse.get_pressed()[0])
+                    py.event.pump()
+                    # При нажатии на картинку вызываем функцию перемещения окна за мышью
+                    move_window()
+        
+        loudness = get_loudness(stream) - BackgroundNoise
+
+        LogLine(True, False, False) # Вывод информации о громкости. 
+
+        if(loudness>maxV):
+            loudness=maxV
+        elif(loudness<0):
+            loudness=0
+        
+        Number_mouth=round(loudness/maxV * (len(mouth)-1))
+        for i in range(0,len(mouth)):
+            window_screen.blit(mouth[Number_mouth], (0, 0))
+            if(Number_mouth==i):
+                mouth[i].set_alpha(0)
+            else:
+                mouth[i].set_alpha(255)
+        else:
+            #time.sleep(1/10)
+            py.display.update()
+    Exit(p, stream) 
+
 except Exception:
+    show_console()
     e = sys.exc_info()[1]
     if(e.args[0]==-9996):
         print("У вас нет микрофона или он отключен в настройках звука.")
@@ -117,45 +179,5 @@ except Exception:
         print(f"Убедитесь, что количество каналов в настройках микрофона/VoiceMeeter не меньше, чем значение CHANNELS. Сейчас у вас CHANNELS = {CHANNELS}")
     else:
         print(e)
+    input("Нажмите Enter")
     Exit(p, stream=None)
-    
-    
-
-
-
-t=time.time()
-window_screen.fill((255,0,128))
-window_screen.blit(mouth[0], (0, 0))
-while not close:
-    for event in py.event.get():
-        if event.type == py.QUIT:
-            close = True
-            Exit(p, stream)
-        elif event.type == py.MOUSEBUTTONDOWN:
-            
-            while py.mouse.get_pressed()[0]==True:
-                #print(py.mouse.get_pressed()[0])
-                py.event.pump()
-                # При нажатии на картинку вызываем функцию перемещения окна за мышью
-                move_window()
-    
-    loudness = get_loudness(stream) - BackgroundNoise
-
-    LogLine(True, False, False) # Вывод информации о громкости. 
-
-    if(loudness>maxV):
-        loudness=maxV
-    elif(loudness<0):
-        loudness=0
-    
-    Number_mouth=round(loudness/maxV * (len(mouth)-1))
-    for i in range(0,len(mouth)):
-        window_screen.blit(mouth[Number_mouth], (0, 0))
-        if(Number_mouth==i):
-            mouth[i].set_alpha(0)
-        else:
-            mouth[i].set_alpha(255)
-    else:
-        #time.sleep(1/10)
-        py.display.update()
-Exit(p, stream) 
