@@ -1,13 +1,15 @@
 import pygame as py
-import win32api
-import win32con
-import win32gui
 import pyaudio
-import os
+
+import win32api, win32gui
+import win32.lib.win32con as win32con
+
 import time
 import numpy as np
-import json
+import os
 import sys
+import json
+
 
 # Размер окна
 Window_Size = 300
