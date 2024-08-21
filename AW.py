@@ -43,6 +43,15 @@ def LogLine(PrintLoudness=True, PrintSettings=False, PrintDeviceInfo=True):
             
         print("="*100)
 
+def Exit(p, stream):
+    print("Остановка программы")
+    if stream != None:
+        stream.stop_stream()
+        stream.close()
+    p.terminate()
+    py.quit()
+    sys.exit(1)
+
 
 def move_window():
     hwnd = py.display.get_wm_info()["window"]
@@ -107,6 +116,8 @@ except Exception:
         print(f"Убедитесь, что количество каналов в настройках микрофона/VoiceMeeter не меньше, чем значение CHANNELS. Сейчас у вас CHANNELS = {CHANNELS}")
     else:
         print(e)
+    Exit(p, stream=None)
+    
     
 
 
@@ -118,6 +129,7 @@ while not close:
     for event in py.event.get():
         if event.type == py.QUIT:
             close = True
+            Exit(stream, p)
         elif event.type == py.MOUSEBUTTONDOWN:
             
             while py.mouse.get_pressed()[0]==True:
@@ -143,7 +155,4 @@ while not close:
     else:
         #time.sleep(1/10)
         py.display.update()
-stream.stop_stream()
-stream.close()
-p.terminate()
-py.quit()
+Exit(p, stream)
