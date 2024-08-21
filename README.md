@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a Python-based application that uses audio input to animate a character's mouth in real-time. The character's mouth opens and closes depending on the loudness of the audio input, creating a visual representation of the sound. The application is built using the Pygame library for graphics and Pyaudio for audio processing. 
+This project is a Python-based application that uses audio input to animate a character's mouth in real-time. The character's mouth opens and closes depending on the volume of the sound, simulating speech.. The application is built using the Pygame library for graphics and Pyaudio for audio processing. 
 
 The character's sprite animations can be customized by placing different images in the specified sprite folder. The application also supports basic window management, such as moving the window around the screen by dragging it with the mouse.
 
