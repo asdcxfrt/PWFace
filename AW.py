@@ -19,6 +19,7 @@ Reflect = True
 # Запустите программу и протестируйте кофортную для вас громкость речи. Если вы не стесняетесь орать на всю квартиру(или у вас громкий микрофон)
 # И в терминале громкость заметно больше 2000, то можете увеличить значение maxV. 
 maxV=2000
+BackgroundNoise=100  # Уровень шума окружения. 
 # Вывод в консоль 
 DebugMode = True
 
@@ -134,16 +135,18 @@ while not close:
             
             while py.mouse.get_pressed()[0]==True:
                 #print(py.mouse.get_pressed()[0])
-                py.event.get()
+                py.event.pump()
                 # При нажатии на картинку вызываем функцию перемещения окна за мышью
                 move_window()
     
-    loudness = get_loudness(stream)
+    loudness = get_loudness(stream) - BackgroundNoise
 
     LogLine(True, False, False) # Вывод информации о громкости. 
 
     if(loudness>maxV):
         loudness=maxV
+    elif(loudness<0):
+        loudness=0
     
     Number_mouth=round(loudness/maxV * (len(mouth)-1))
     for i in range(0,len(mouth)):
