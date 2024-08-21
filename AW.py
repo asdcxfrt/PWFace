@@ -13,9 +13,9 @@ import sys
 Window_Size = 300
 # Повернуть персонажа в другую сторону 
 Reflect = True 
-# Режим VoiceMeeter.
-VoiceMeeterMode = False
 # Максимальная громкость входного аудиопотока. Если будет больше, то программа установит значение громкости равное maxV.
+# Запустите программу и протестируйте кофортную для вас громкость речи. Если вы не стесняетесь орать на всю квартиру(или у вас громкий микрофон)
+# И в терминале громкость заметно больше 2000, то можете увеличить значение maxV. 
 maxV=2000
 # Вывод в консоль 
 DebugMode = True
@@ -25,20 +25,21 @@ DebugMode = True
 sprite_folder = "Sprites"
 
 def LogLine(PrintLoudness=True, PrintSettings=False, PrintDeviceInfo=True):
-    global Window_Size, Reflect, VoiceMeeterMode
-    global loudness, maxV
-    if PrintLoudness:
-        print(f"Уровень громкости аудиопотока: {loudness}", end="")
-        if loudness>maxV:
-            print(f" Урезан как: {maxV}", end="")
-        print()
-    if PrintSettings:
-        print(f"Установленны настройки: Размер окна: {Window_Size}, Поворот персонажа: {Reflect}, Режим VoiceMeeter: {VoiceMeeterMode}, Верхний порог громкости {maxV}")
-    if PrintDeviceInfo:
-        json_string = json.dumps(device_info, indent=4)  
-        print(json_string)
-        
-    print("="*100)
+    global Window_Size, Reflect
+    global loudness, maxV, DebugMode
+    if DebugMode == True:
+        if PrintLoudness:
+            print(f"Уровень громкости аудиопотока: {loudness}", end="")
+            if loudness>maxV:
+                print(f" Урезан как: {maxV}", end="")
+            print()
+        if PrintSettings:
+            print(f"Установленны настройки: Размер окна: {Window_Size}, Поворот персонажа: {Reflect}, Верхний порог громкости {maxV}")
+        if PrintDeviceInfo:
+            json_string = json.dumps(device_info, indent=4)  
+            print(json_string)
+            
+        print("="*100)
 
 
 def move_window():
@@ -82,51 +83,29 @@ p = pyaudio.PyAudio()
 # Настройки аудипотока. 
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
-CHANNELS = 1 
+CHANNELS = 1
 RATE = 48000
 
-# Поиск звукового потока (микрофон или другой источник через VoiceMeeter).
-# Для работы с уже записанными файлами (видео или музыка), настройте VoiceMeeter и активируйте режим VoiceMeeterMode.
-# VoiceMeeterMode особенно полезен для создания ИИ-каверов с персонажами. (Как пример)
+# Звуковой поток (микрофон или другой источник через VoiceMeeter).
+# Для работы с уже записанными файлами (видео или музыка), настройте VoiceMeeter.
+# В настройках звука отлючите реальный микрофон и включите VoiceMeeter Output и VoiceMeeter Input. 
 # После настройки VoiceMeeter просто запустите воспроизведение медиафайла в вашем стандартном медиаплеере.
 device_info={}
-if VoiceMeeterMode == True:
-    device_index = None
-    for i in range(p.get_device_count()):
-        device_info = p.get_device_info_by_index(i)
-        LogLine(False, False, True)
-        if "VoiceMeeter" in device_info["name"]:
-            device_index = i
-            break
 
-    if device_index is None:
-        print("Не удалось найти зацикленное звуковое устройство. Вероятно вы не установили VoiceMeeter")
-        exit()
+# Понял, что должно работать с ЛЮБЫМ микрофоном по умолчанию. 
+try:
+    stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK_SIZE)
+except Exception:
+    e = sys.exc_info()[1]
+    if(e.args[0]==-9996):
+        print("У вас нет микрофона или он отключен в настройках звука.")
+        print("Если хотите использовать VoiceMeeter, то включите VoiceMeeter Output и VoiceMeeter Input в настройках звука.")
+        print("Аудиопоток идет с устройства ввода по умолчанию. Можно настроить в настройках звука")
+    elif(e.args[0]==-9998):
+        print(f"Убедитесь, что количество каналов в настройках микрофона/VoiceMeeter не меньше, чем значение CHANNELS. Сейчас у вас CHANNELS = {CHANNELS}")
+    else:
+        print(e)
     
-    # создание входного потока аудио
-    try:
-        stream = p.open(format=FORMAT, channels=2, rate=RATE, input=True, input_device_index=device_index, frames_per_buffer=CHUNK_SIZE)
-    except Exception:
-        e = sys.exc_info()[1]
-        if(e.args[0]==-9999):
-            print("Надо настроить VoiceMetter. Включить VoiceMetter Input в настройках Звука.")
-        elif(e.args[0]==-9998):
-            print("Надо настроить VoiceMetter. Включить VoiceMetter Output в настройках Звука.")
-            print(f"Убедитесь, что количество каналов в настройках VoiceMetter не меньше, чем значение CHANNELS. Сейчас у вас CHANNELS = {CHANNELS}")
-        print(e.args)
-    
-
-else:
-    # Должно работать с микрофоном по умолчанию. 
-    try:
-        stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, input=True, frames_per_buffer=CHUNK_SIZE)
-    except Exception:
-        e = sys.exc_info()[1]
-        if(e.args[0]==-9996):
-            print("У вас нет микрофона или он отключен в настройках звука.")
-        elif(e.args[0]==-9998):
-            print(f"Убедитесь, что количество каналов в настройках микрофона не меньше, чем значение CHANNELS. Сейчас у вас CHANNELS = {CHANNELS}")
-        print(e.args)
 
 
 
@@ -140,18 +119,19 @@ while not close:
         elif event.type == py.MOUSEBUTTONDOWN:
             
             while py.mouse.get_pressed()[0]==True:
-                print(py.mouse.get_pressed()[0])
+                #print(py.mouse.get_pressed()[0])
                 py.event.get()
                 # При нажатии на картинку вызываем функцию перемещения окна за мышью
                 move_window()
     
     loudness = get_loudness(stream)
-    print(loudness)
+
+    LogLine(True, False, False) # Вывод информации о громкости. 
+
     if(loudness>maxV):
         loudness=maxV
     
     Number_mouth=round(loudness/maxV * (len(mouth)-1))
-    print(Number_mouth)
     for i in range(0,len(mouth)):
         window_screen.blit(mouth[Number_mouth], (0, 0))
         if(Number_mouth==i):
