@@ -23,7 +23,8 @@ maxV=2000
 BackgroundNoise=100  # Уровень шума окружения. 
 # Вывод в консоль. Если хотите убрать консоль, то установите в False
 DebugMode = True
-
+ChromaKeyColor = (10, 10, 10) # (0, 255, 0) Абослютно зеленный хромокей.
+Hide_character = False # Установите True, если хотите скрыть окно с персонажем. (Может быть полезно для захвата через OBS именно окна).
 # Папка со спрайтами персонажа. Имена файлов должны легко сортироваться, чтобы при их упорядочивании они совпадали с вашими ожиданиями.
 # Чем больше цифра в имени файла, тем больше степень открытости рта, и т.д.
 sprite_folder = "Sprites"
@@ -90,11 +91,28 @@ def get_loudness(stream):
 
 py.init() 
 
-window_screen = py.display.set_mode((Window_Size, Window_Size),py.NOFRAME)
+# Инициализация PyGame и создание окна без рамки\ppy.init()
+window_screen = py.display.set_mode((Window_Size, Window_Size), py.NOFRAME)
+
+# Получаем hwnd и включаем слой с цветовым ключом
 hwnd = py.display.get_wm_info()["window"]
-win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, win32gui.GetWindowLong(
-                       hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED)
-win32gui.SetLayeredWindowAttributes(hwnd, win32api.RGB(255, 0, 128), 0, win32con.LWA_COLORKEY)
+win32gui.SetWindowLong(
+    hwnd,
+    win32con.GWL_EXSTYLE,
+    win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE) | win32con.WS_EX_LAYERED
+)
+# Устанавливаем цветовой ключ для оконного слоя
+win32gui.SetLayeredWindowAttributes(
+    hwnd,
+    win32api.RGB(*ChromaKeyColor),
+    0,
+    win32con.LWA_COLORKEY
+)
+
+if Hide_character:
+    win32gui.SetLayeredWindowAttributes(hwnd, 0, 0, win32con.LWA_ALPHA)
+
+
 
 # Поддерживаемые форматы изображений
 supported_formats = {".bmp", ".jpg", ".jpeg", ".png", ".gif"}
@@ -123,7 +141,8 @@ RATE = 48000
 # После настройки VoiceMeeter просто запустите воспроизведение любого медиафайла.
 device_info={}
 
-window_screen.fill((255,0,128))
+# Заливаем фон хрома-кеем и рисуем начальный кадр
+window_screen.fill(ChromaKeyColor)
 window_screen.blit(mouth[0], (0, 0))
 py.display.update()
 
@@ -156,16 +175,13 @@ try:
         elif(loudness<0):
             loudness=0
         
-        Number_mouth=round(loudness/maxV * (len(mouth)-1))
-        for i in range(0,len(mouth)):
-            window_screen.blit(mouth[Number_mouth], (0, 0))
-            if(Number_mouth==i):
-                mouth[i].set_alpha(0)
-            else:
-                mouth[i].set_alpha(255)
-        else:
-            #time.sleep(1/10)
-            py.display.update()
+        idx = round(loudness / maxV * (len(mouth) - 1))
+
+        # Рисуем текущий спрайт на фоне хрома-кея
+        window_screen.fill(ChromaKeyColor)
+        window_screen.blit(mouth[idx], (0, 0))
+        py.display.update()
+        
     Exit(p, stream) 
 
 except Exception:
